@@ -1,0 +1,4 @@
+Window 800 600
+Font fonts/Arial.ttf 18 255 255 255
+Circle CGreen 100 100 -3 2 0 255 0 50
+Rectangle RRed 200 200 1 1.5 255 0 0 50 25
