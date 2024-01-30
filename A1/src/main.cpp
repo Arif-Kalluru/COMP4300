@@ -1,8 +1,8 @@
+#include <SFML/Graphics.hpp>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <SFML/Graphics.hpp>
 
 // Font Properties
 struct FontProps {
@@ -22,21 +22,24 @@ struct Game {
 };
 
 class Entity {
-public:
+    public:
 	std::shared_ptr<sf::Shape> shape;
 	std::shared_ptr<sf::Text> text;
 	float sx;
 	float sy;
 };
 
-void loadConfigFile(const std::string& filename, Game& game, std::vector<std::shared_ptr<Entity>>& entities);
+void loadConfigFile(const std::string& filename, Game& game,
+		    std::vector<std::shared_ptr<Entity> >& entities);
 
 int main(int argc, char* argv[])
 {
 	Game game;
-	std::vector<std::shared_ptr<Entity>> entities;
+	std::vector<std::shared_ptr<Entity> > entities;
 	loadConfigFile("bin/config.txt", game, entities);
-	sf::RenderWindow window(sf::VideoMode(game.windowWidth, game.windowHeight), "SFML works!");
+	sf::RenderWindow window(sf::VideoMode(game.windowWidth,
+					      game.windowHeight),
+				"SFML works!");
 	// 60 FPS
 	window.setFramerateLimit(60);
 
@@ -45,10 +48,11 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 
-	sf::Text sampleText("Press x to reverse velocities.", game.font.gameFont, game.font.size);
+	sf::Text sampleText("Press x to reverse velocities.",
+			    game.font.gameFont, game.font.size);
 	sampleText.setPosition(0, 0);
 
-	while (window.isOpen()){
+	while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
@@ -56,7 +60,8 @@ int main(int argc, char* argv[])
 			}
 
 			if (event.type == sf::Event::KeyPressed) {
-				std::cout << "Key pressed with code = " << event.key.code << "\n";
+				std::cout << "Key pressed with code = "
+					  << event.key.code << "\n";
 
 				// Move in opposite direction
 				if (event.key.code == sf::Keyboard::X) {
@@ -79,18 +84,23 @@ int main(int argc, char* argv[])
 
 			// Check for collisions
 			// Left or right collision
-			if (shapeX < 0 || (shapeX + shapeWidth > game.windowWidth)) {
+			if (shapeX < 0 ||
+			    (shapeX + shapeWidth > game.windowWidth)) {
 				e->sx *= -1.0f;
 			}
 
 			// Top or bottom collision
-			if (shapeY < 0 || (shapeY + shapeHeight > game.windowHeight)) {
+			if (shapeY < 0 ||
+			    (shapeY + shapeHeight > game.windowHeight)) {
 				e->sy *= -1.0f;
 			}
 
-			e->shape->setPosition(e->shape->getPosition().x + e->sx, e->shape->getPosition().y + e->sy);
+			e->shape->setPosition(e->shape->getPosition().x + e->sx,
+					      e->shape->getPosition().y +
+						      e->sy);
 			// center the text with the entity
-			e->text->setPosition(shapeX +  (shapeWidth / 2) - (textWidth / 2),
+			e->text->setPosition(
+				shapeX + (shapeWidth / 2) - (textWidth / 2),
 				shapeY + (shapeHeight / 2) - (textHeight / 2));
 		}
 
@@ -108,13 +118,15 @@ int main(int argc, char* argv[])
 }
 
 // Set game object & load entities.
-void loadConfigFile(const std::string& filename, Game& game, std::vector<std::shared_ptr<Entity>>& entities)
+void loadConfigFile(const std::string& filename, Game& game,
+		    std::vector<std::shared_ptr<Entity> >& entities)
 {
 	std::ifstream fin(filename);
 	std::string token;
 
 	fin >> token >> game.windowWidth >> game.windowHeight;
-	fin >> token >> game.font.name >> game.font.size >> game.font.r >> game.font.b >> game.font.g;
+	fin >> token >> game.font.name >> game.font.size >> game.font.r >>
+		game.font.b >> game.font.g;
 
 	while (fin >> token) {
 		auto e = std::make_shared<Entity>();
@@ -124,8 +136,10 @@ void loadConfigFile(const std::string& filename, Game& game, std::vector<std::sh
 			// Name
 			std::string name;
 			fin >> name;
-			e->text = std::make_shared<sf::Text>(name, game.font.gameFont, game.font.size);
-			e->text->setFillColor(sf::Color(game.font.r, game.font.g, game.font.b));
+			e->text = std::make_shared<sf::Text>(
+				name, game.font.gameFont, game.font.size);
+			e->text->setFillColor(sf::Color(
+				game.font.r, game.font.g, game.font.b));
 
 			// Initial co-ordinates
 			int x, y;
@@ -152,8 +166,10 @@ void loadConfigFile(const std::string& filename, Game& game, std::vector<std::sh
 			// Name
 			std::string name;
 			fin >> name;
-			e->text = std::make_shared<sf::Text>(name, game.font.gameFont, game.font.size);
-			e->text->setFillColor(sf::Color(game.font.r, game.font.g, game.font.b));
+			e->text = std::make_shared<sf::Text>(
+				name, game.font.gameFont, game.font.size);
+			e->text->setFillColor(sf::Color(
+				game.font.r, game.font.g, game.font.b));
 
 			// Initial co-ordinates
 			int x, y;
