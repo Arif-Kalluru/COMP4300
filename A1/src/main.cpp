@@ -1,8 +1,10 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
 #include <vector>
+#include <SFML/Graphics.hpp>
 
+// Font Properties
 struct FontProps {
 	std::string name;
 	sf::Font gameFont;
@@ -12,7 +14,7 @@ struct FontProps {
 	uint16_t b;
 };
 
-// Game config
+// Game config object
 struct Game {
 	FontProps font;
 	int windowWidth;
@@ -21,20 +23,21 @@ struct Game {
 
 class Entity {
 public:
-	sf::Shape* shape;
-	sf::Text* text;
+	std::shared_ptr<sf::Shape> shape;
+	std::shared_ptr<sf::Text> text;
 	float sx;
 	float sy;
 };
 
-void loadConfigFile(const std::string& filename, Game& game, std::vector<Entity*>& entities);
+void loadConfigFile(const std::string& filename, Game& game, std::vector<std::shared_ptr<Entity>>& entities);
 
 int main(int argc, char* argv[])
 {
 	Game game;
-	std::vector<Entity*> entities;
+	std::vector<std::shared_ptr<Entity>> entities;
 	loadConfigFile("bin/config.txt", game, entities);
 	sf::RenderWindow window(sf::VideoMode(game.windowWidth, game.windowHeight), "SFML works!");
+	// 60 FPS
 	window.setFramerateLimit(60);
 
 	if (!game.font.gameFont.loadFromFile(game.font.name)) {
@@ -86,7 +89,7 @@ int main(int argc, char* argv[])
 			}
 
 			e->shape->setPosition(e->shape->getPosition().x + e->sx, e->shape->getPosition().y + e->sy);
-			// center the text
+			// center the text with the entity
 			e->text->setPosition(shapeX +  (shapeWidth / 2) - (textWidth / 2),
 				shapeY + (shapeHeight / 2) - (textHeight / 2));
 		}
@@ -101,17 +104,11 @@ int main(int argc, char* argv[])
 		window.display();
 	}
 
-	// Freeing memory
-	for (auto& e : entities) {
-		delete e->shape;
-		delete e->text;
-		delete e;
-	}
-
 	return 0;
 }
 
-void loadConfigFile(const std::string& filename, Game& game, std::vector<Entity*>& entities)
+// Set game object & load entities.
+void loadConfigFile(const std::string& filename, Game& game, std::vector<std::shared_ptr<Entity>>& entities)
 {
 	std::ifstream fin(filename);
 	std::string token;
@@ -120,14 +117,14 @@ void loadConfigFile(const std::string& filename, Game& game, std::vector<Entity*
 	fin >> token >> game.font.name >> game.font.size >> game.font.r >> game.font.b >> game.font.g;
 
 	while (fin >> token) {
-		Entity* e = new Entity;
+		auto e = std::make_shared<Entity>();
 
 		if (token == "Circle") {
-			sf::CircleShape* pCircle = new sf::CircleShape;
+			auto pCircle = std::make_shared<sf::CircleShape>();
 			// Name
 			std::string name;
 			fin >> name;
-			e->text = new sf::Text(name, game.font.gameFont, game.font.size);
+			e->text = std::make_shared<sf::Text>(name, game.font.gameFont, game.font.size);
 			e->text->setFillColor(sf::Color(game.font.r, game.font.g, game.font.b));
 
 			// Initial co-ordinates
@@ -151,11 +148,11 @@ void loadConfigFile(const std::string& filename, Game& game, std::vector<Entity*
 			e->shape = pCircle;
 			entities.push_back(e);
 		} else if (token == "Rectangle") {
-			sf::RectangleShape* pRect= new sf::RectangleShape;
+			auto pRect = std::make_shared<sf::RectangleShape>();
 			// Name
 			std::string name;
 			fin >> name;
-			e->text = new sf::Text(name, game.font.gameFont, game.font.size);
+			e->text = std::make_shared<sf::Text>(name, game.font.gameFont, game.font.size);
 			e->text->setFillColor(sf::Color(game.font.r, game.font.g, game.font.b));
 
 			// Initial co-ordinates
