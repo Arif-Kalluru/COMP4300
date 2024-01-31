@@ -51,19 +51,14 @@ void Game::init(const std::string& filePath)
 
 	// bullet config
 	BulletConfig& b = m_bulletConfig;  // alias
-	fin >> token >> b.SR >> b.CR >> b.FR >> b.FG >> b.FB >> b.OR >> b.OG >>
-		b.OB >> b.OT >> b.V >> b.L;
+	fin >> token >> b.SR >> b.CR >> b.S >> b.FR >> b.FG >> b.FB >> b.OR >>
+		b.OG >> b.OB >> b.OT >> b.V >> b.L;
 
 	this->spawnPlayer();
 }
 
 void Game::setPaused(bool paused)
 {
-}
-
-int Game::randomInRange(int lower, int upper)
-{
-	return lower + rand() % (upper - lower + 1);
 }
 
 void Game::sUserInput()
@@ -74,7 +69,18 @@ void Game::sUserInput()
 			m_window.close();
 		}
 
+		// Keyboard events
 		if (event.type == sf::Event::KeyPressed) {
+		}
+
+		// Mouse events
+		if (event.type == sf::Event::MouseButtonPressed) {
+			// Left mouse button shoots a button
+			if (event.mouseButton.button == sf::Mouse::Left) {
+				Vec2 mousePos(event.mouseButton.x,
+					      event.mouseButton.y);
+				spawnBullet(mousePos);
+			}
 		}
 	}
 }
@@ -96,6 +102,14 @@ void Game::sRender()
 	}
 
 	m_window.display();
+}
+
+void Game::sEnemySpawner()
+{
+	// spawn enemy only if certain amount of frames have passed (Spawn Interval)
+	if (m_currentFrame - m_lastEnemySpawnFrame < m_enemyConfig.SI)
+		return;
+	this->spawnEnemy();
 }
 
 void Game::spawnPlayer()
@@ -132,6 +146,7 @@ void Game::spawnEnemy()
 
 	// Adding Transform
 	// Spawn at random location with shape totally in bounds of screen
+	// TODO: try to never spawn enemy within the player's colliding radius
 	float X = randomInRange(eC.SR, m_window.getSize().x - eC.SR);
 	float Y = randomInRange(eC.SR, m_window.getSize().y - eC.SR);
 	entity->cTransform = std::make_shared<CTransform>(
@@ -139,14 +154,14 @@ void Game::spawnEnemy()
 
 	// Adding shape
 	// Random fill color
-	int r = this->randomInRange(0, 255);
-	int g = this->randomInRange(0, 255);
-	int b = this->randomInRange(0, 255);
+	int r = randomInRange(0, 255);
+	int g = randomInRange(0, 255);
+	int b = randomInRange(0, 255);
 	sf::Color fillColor(r, g, b);
 	sf::Color outlineColor(eC.OR, eC.OG, eC.OB);
 
 	// Random number of vertices in range [VMIN, VMAX]
-	int vertices = this->randomInRange(eC.VMIN, eC.VMAX);
+	int vertices = randomInRange(eC.VMIN, eC.VMAX);
 	entity->cShape = std::make_shared<CShape>(eC.SR, vertices, fillColor,
 						  outlineColor, eC.OT);
 
@@ -160,6 +175,36 @@ void Game::spawnEnemy()
 	m_lastEnemySpawnFrame = m_currentFrame;
 }
 
+void Game::spawnBullet(const Vec2& mousePos)
+{
+	BulletConfig& bC = m_bulletConfig;
+	auto entity = m_entityManager.addEntity("bullet");
+
+	// Adding Transform
+	float X = m_player->cTransform->pos.x;
+	float Y = m_player->cTransform->pos.y;
+	// Finding velocity Vec2
+	// Find direction vector from current position of player to mousePos
+	// Normalize the vector and multiply with speed of bullet
+	Vec2 vel = mousePos - m_player->cTransform->pos;
+	vel.normalize();
+	vel *= bC.S;
+	DEBUG(vel.x);
+	DEBUG(vel.y);
+
+	entity->cTransform =
+		std::make_shared<CTransform>(Vec2(X, Y), vel, 0.0f);
+
+	// Adding shape
+	sf::Color fillColor(bC.FR, bC.FG, bC.FB);
+	sf::Color outlineColor(bC.OR, bC.OG, bC.OB);
+	entity->cShape = std::make_shared<CShape>(bC.SR, bC.V, fillColor,
+						  outlineColor, bC.OT);
+
+	// Enabling collisions
+	entity->cCollision = std::make_shared<CCollision>(bC.CR);
+}
+
 void Game::run()
 {
 	while (m_window.isOpen()) {
@@ -169,9 +214,9 @@ void Game::run()
 
 		m_entityManager.update();
 
-		// sEnemySpawner();
-		// sMovement();
-		// sCollision();
+		this->sEnemySpawner();
+		// this->sMovement();
+		// this->sCollision();
 		this->sUserInput();
 		this->sRender();
 

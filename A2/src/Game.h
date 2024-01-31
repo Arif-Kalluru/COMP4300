@@ -39,7 +39,6 @@ class Game {
 	// initialize game state with config file
 	void init(const std::string& filePath);
 	void setPaused(bool paused);
-	int randomInRange(int lower, int upper);
 
 	void sMovement();      // System: Entity position/movement update
 	void sUserInput();     // System: User input
@@ -51,7 +50,7 @@ class Game {
 	void spawnPlayer();
 	void spawnEnemy();
 	void spawnSmallEnemies(std::shared_ptr<Entity> entity);
-	void spawnBullet(std::shared_ptr<Entity> entity, const Vec2& mousePos);
+	void spawnBullet(const Vec2& mousePos);
 	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 
 public:

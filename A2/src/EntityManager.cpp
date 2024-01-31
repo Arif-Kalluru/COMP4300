@@ -33,7 +33,8 @@ void EntityManager::removeDeadEntities(entityVec& vec)
 
 std::shared_ptr<Entity> EntityManager::addEntity(const std::string& tag)
 {
-	auto entity = std::shared_ptr<Entity>(new Entity(m_totalEntities++, tag));
+	auto entity =
+		std::shared_ptr<Entity>(new Entity(m_totalEntities++, tag));
 	// Don't add to entities, make a queue instead. Entities are added in update
 	m_entitiesToAdd.push_back(entity);
 	return entity;
