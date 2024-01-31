@@ -61,6 +61,13 @@ void Game::setPaused(bool paused)
 {
 }
 
+void Game::sMovement()
+{
+	for (const auto e : m_entityManager.getEntities()) {
+		e->cTransform->pos += e->cTransform->velocity;
+	}
+}
+
 void Game::sUserInput()
 {
 	sf::Event event;
@@ -149,8 +156,17 @@ void Game::spawnEnemy()
 	// TODO: try to never spawn enemy within the player's colliding radius
 	float X = randomInRange(eC.SR, m_window.getSize().x - eC.SR);
 	float Y = randomInRange(eC.SR, m_window.getSize().y - eC.SR);
-	entity->cTransform = std::make_shared<CTransform>(
-		Vec2(X, Y), Vec2(0.0f, 0.0f), 0.0f);
+	// Random velocity
+	// Assign random x vel and y vel. Normalize the vector
+	// Multiply this vector with random in range [SMIN, SMAX]
+	float xVel = randomInRange(-10, 10);
+	float yVel = randomInRange(-10, 10);
+	Vec2 vel(xVel, yVel);
+	vel.normalize();
+	vel *= randomInRange(eC.SMIN, eC.SMAX);
+
+	entity->cTransform =
+		std::make_shared<CTransform>(Vec2(X, Y), vel, 0.0f);
 
 	// Adding shape
 	// Random fill color
@@ -189,8 +205,6 @@ void Game::spawnBullet(const Vec2& mousePos)
 	Vec2 vel = mousePos - m_player->cTransform->pos;
 	vel.normalize();
 	vel *= bC.S;
-	DEBUG(vel.x);
-	DEBUG(vel.y);
 
 	entity->cTransform =
 		std::make_shared<CTransform>(Vec2(X, Y), vel, 0.0f);
@@ -215,7 +229,7 @@ void Game::run()
 		m_entityManager.update();
 
 		this->sEnemySpawner();
-		// this->sMovement();
+		this->sMovement();
 		// this->sCollision();
 		this->sUserInput();
 		this->sRender();
