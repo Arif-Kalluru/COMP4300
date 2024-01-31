@@ -33,12 +33,12 @@ class Game {
 	uint64_t m_currentFrame = 0;
 	uint64_t m_lastEnemySpawnFrame = 0;
 	bool m_paused = false;
+	bool m_running = true;
 
 	std::shared_ptr<Entity> m_player;
 
 	// initialize game state with config file
 	void init(const std::string& filePath);
-	void setPaused(bool paused);
 
 	void sMovement();      // System: Entity position/movement update
 	void sUserInput();     // System: User input

@@ -57,12 +57,22 @@ void Game::init(const std::string& filePath)
 	this->spawnPlayer();
 }
 
-void Game::setPaused(bool paused)
-{
-}
-
 void Game::sMovement()
 {
+	// player movement
+	// reset player movement
+	m_player->cTransform->velocity = { 0.0f, 0.0f };
+
+	if (m_player->cInput->up) {
+		m_player->cTransform->velocity.y = -m_playerConfig.S;
+	} else if (m_player->cInput->down) {
+		m_player->cTransform->velocity.y = m_playerConfig.S;
+	} else if (m_player->cInput->left) {
+		m_player->cTransform->velocity.x = -m_playerConfig.S;
+	} else if (m_player->cInput->right) {
+		m_player->cTransform->velocity.x = m_playerConfig.S;
+	}
+
 	for (const auto e : m_entityManager.getEntities()) {
 		e->cTransform->pos += e->cTransform->velocity;
 	}
@@ -73,11 +83,53 @@ void Game::sUserInput()
 	sf::Event event;
 	while (m_window.pollEvent(event)) {
 		if (event.type == sf::Event::Closed) {
-			m_window.close();
+			m_running = false;
+			return;
 		}
 
 		// Keyboard events
 		if (event.type == sf::Event::KeyPressed) {
+			// Player movement
+			switch (event.key.code) {
+			case sf::Keyboard::W:
+				m_player->cInput->up = true;
+				break;
+			case sf::Keyboard::S:
+				m_player->cInput->down = true;
+				break;
+			case sf::Keyboard::A:
+				m_player->cInput->left = true;
+				break;
+			case sf::Keyboard::D:
+				m_player->cInput->right = true;
+				break;
+			// Pause game
+			case sf::Keyboard::Escape:
+				m_paused = !m_paused;
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (event.type == sf::Event::KeyReleased) {
+			switch (event.key.code) {
+			// Player movement
+			case sf::Keyboard::W:
+				m_player->cInput->up = false;
+				break;
+			case sf::Keyboard::S:
+				m_player->cInput->down = false;
+				break;
+			case sf::Keyboard::A:
+				m_player->cInput->left = false;
+				break;
+			case sf::Keyboard::D:
+				m_player->cInput->right = false;
+				break;
+			default:
+				break;
+			}
 		}
 
 		// Mouse events
@@ -86,7 +138,11 @@ void Game::sUserInput()
 			if (event.mouseButton.button == sf::Mouse::Left) {
 				Vec2 mousePos(event.mouseButton.x,
 					      event.mouseButton.y);
-				spawnBullet(mousePos);
+				// Required to check if game is in pause state! Smart asses can
+				// pause the game, shoot mutliple bullets then resume, multiple
+				// bullets will be spawned!
+				if (!m_paused)
+					spawnBullet(mousePos);
 			}
 		}
 	}
@@ -222,15 +278,20 @@ void Game::spawnBullet(const Vec2& mousePos)
 void Game::run()
 {
 	while (m_window.isOpen()) {
-		// TODO: add pause functionality
-		if (!m_paused) {
+		if (!m_running) {
+			m_window.close();
+			return;
 		}
 
-		m_entityManager.update();
+		// If not paused, run these systems
+		if (!m_paused) {
+			m_entityManager.update();
 
-		this->sEnemySpawner();
-		this->sMovement();
-		// this->sCollision();
+			this->sEnemySpawner();
+			// this->sCollision();
+			this->sMovement();
+		}
+
 		this->sUserInput();
 		this->sRender();
 
