@@ -23,7 +23,7 @@
   SMIN, SMAX: float, float; min/max speed
   VMIN, VMAX: int, int; min/max vertices
   L: int; lifespan of smaller enemies that it generates when it dies
-  SP: int, spawn interval
+  SP: int, spawn interval (in frames)
 
 - Bullet SR CR S FR FG FB OR OG OB OT V L
 

@@ -11,9 +11,10 @@ class Entity {
 	size_t m_id = 0;
 	std::string m_tag = "default";
 
+	// Only EntityManager should be allowed to make new Entities
 	Entity(const size_t id, const std::string& tag);
 
-    public:
+public:
 	// component pointers
 	std::shared_ptr<CTransform> cTransform;
 	std::shared_ptr<CShape> cShape;

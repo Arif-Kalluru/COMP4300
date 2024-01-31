@@ -1,7 +1,7 @@
 #pragma once
 
 class Vec2 {
-    public:
+public:
 	float x = 0;
 	float y = 0;
 
