@@ -1,5 +1,6 @@
 #include "EntityManager.h"
 #include "Entity.h"
+#include <algorithm>
 
 EntityManager::EntityManager()
 {
@@ -29,6 +30,10 @@ void EntityManager::update()
 
 void EntityManager::removeDeadEntities(entityVec& vec)
 {
+	// TODO: look into it's effeciency
+	vec.erase(std::remove_if(vec.begin(), vec.end(),
+				 [](auto it) { return !it->isActive(); }),
+		  vec.end());
 }
 
 std::shared_ptr<Entity> EntityManager::addEntity(const std::string& tag)
@@ -47,5 +52,5 @@ const entityVec& EntityManager::getEntities()
 
 const entityVec& EntityManager::getEntities(const std::string& tag)
 {
-	return m_entities;
+	return m_entitiesMap[tag];
 }

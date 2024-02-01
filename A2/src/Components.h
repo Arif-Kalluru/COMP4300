@@ -34,10 +34,10 @@ public:
 
 class CCollision {
 public:
-	float radius = 0;
+	float collisionRadius = 0;
 
 	CCollision(float r)
-		: radius(r)
+		: collisionRadius(r)
 	{
 	}
 };

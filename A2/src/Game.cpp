@@ -151,6 +151,7 @@ void Game::sUserInput()
 void Game::sRender()
 {
 	m_window.clear();
+
 	for (const auto e : m_entityManager.getEntities()) {
 		// set position
 		e->cShape->circle.setPosition(e->cTransform->pos.x,
@@ -173,6 +174,84 @@ void Game::sEnemySpawner()
 	if (m_currentFrame - m_lastEnemySpawnFrame < m_enemyConfig.SI)
 		return;
 	this->spawnEnemy();
+}
+
+void Game::sCollision()
+{
+	auto& playerPos = m_player->cTransform->pos;
+	const auto& pCR = m_player->cCollision->collisionRadius;
+	const auto& winWidth = m_window.getSize().x;
+	const auto& winHeight = m_window.getSize().y;
+
+	// Player bounds check
+	// Collision is only checked once per frame, so if else if works
+	if (playerPos.y < pCR) {
+		// Top collision
+		playerPos.y = pCR;
+	} else if (playerPos.y + pCR > winHeight) {
+		// Bottom collision
+		playerPos.y = winHeight - pCR;
+	} else if (playerPos.x < pCR) {
+		// Left collision
+		playerPos.x = pCR;
+	} else if (playerPos.x + pCR > winWidth) {
+		// Right collision
+		playerPos.x = winWidth - pCR;
+	}
+
+	// Enemies bounce off boundaries
+	for (auto e : m_entityManager.getEntities("enemy")) {
+		const auto& enemyPos = e->cTransform->pos;
+		auto& enemyVel = e->cTransform->velocity;
+		const auto& eCR = e->cCollision->collisionRadius;
+
+		if (enemyPos.y < eCR) {
+			// Top collision
+			enemyVel.y *= -1.0f;
+		} else if (enemyPos.y + eCR > winHeight) {
+			// Bottom collision
+			enemyVel.y *= -1.0f;
+		} else if (enemyPos.x < eCR) {
+			// Left collision
+			enemyVel.x *= -1.0f;
+		} else if (enemyPos.x + eCR > winWidth) {
+			// Right collision
+			enemyVel.x *= -1.0f;
+		}
+	}
+
+	// Bullet collision with enemy
+	// Spawn smaller enemies when enemy dies
+	for (auto b : m_entityManager.getEntities("bullet")) {
+		for (auto e : m_entityManager.getEntities("enemy")) {
+			const auto& enemyPos = e->cTransform->pos;
+			const auto& eCR = e->cCollision->collisionRadius;
+			const auto& bulletPos = b->cTransform->pos;
+			const auto& bCR = b->cCollision->collisionRadius;
+
+			// destroy bullet and enemy
+			if (bulletPos.dist(enemyPos) < bCR + eCR) {
+				e->destroy();
+				b->destroy();
+				spawnSmallEnemies(e);
+			}
+		}
+	}
+
+	// Player collision with enemies
+	// If player dies, it spawns at the middle of the screen
+	for (const auto e : m_entityManager.getEntities("enemy")) {
+		const Vec2& enemyPos = e->cTransform->pos;
+		const float& eCR = e->cCollision->collisionRadius;
+
+		// Current player died, spawn a new one
+		if (playerPos.dist(enemyPos) < pCR + eCR) {
+			m_player->destroy();
+			e->destroy();
+			spawnPlayer();
+			return;
+		}
+	}
 }
 
 void Game::spawnPlayer()
@@ -247,6 +326,10 @@ void Game::spawnEnemy()
 	m_lastEnemySpawnFrame = m_currentFrame;
 }
 
+void Game::spawnSmallEnemies(std::shared_ptr<Entity> entity)
+{
+}
+
 void Game::spawnBullet(const Vec2& mousePos)
 {
 	BulletConfig& bC = m_bulletConfig;
@@ -288,8 +371,8 @@ void Game::run()
 			m_entityManager.update();
 
 			this->sEnemySpawner();
-			// this->sCollision();
 			this->sMovement();
+			this->sCollision();
 		}
 
 		this->sUserInput();
