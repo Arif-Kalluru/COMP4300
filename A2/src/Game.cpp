@@ -44,7 +44,7 @@ void Game::init(const std::string& filePath)
 	// player config
 	PlayerConfig& p = m_playerConfig;  // alias
 	fin >> token >> p.SR >> p.CR >> p.S >> p.FR >> p.FG >> p.FB >> p.OR >>
-		p.OG >> p.OB >> p.OT >> p.V;
+		p.OG >> p.OB >> p.OT >> p.V >> p.T;
 
 	// enemy config
 	EnemyConfig& e = m_enemyConfig;	 // alias
@@ -148,7 +148,18 @@ void Game::sUserInput()
 				// pause the game, shoot mutliple bullets then resume, multiple
 				// bullets will be spawned!
 				if (!m_paused)
-					spawnBullet(mousePos);
+					spawnBullet(m_player, mousePos);
+			}
+
+			if (event.mouseButton.button == sf::Mouse::Right) {
+				// If special weapon is available
+				if (m_lastUsedSpecialWeaponFrame +
+					    m_playerConfig.T <
+				    m_currentFrame) {
+					m_lastUsedSpecialWeaponFrame =
+						m_currentFrame;
+					spawnSpecialWeapon(m_player);
+				}
 			}
 		}
 	}
@@ -463,35 +474,70 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> entity)
 	}
 }
 
-void Game::spawnBullet(const Vec2& mousePos)
+void Game::spawnBullet(std::shared_ptr<Entity> entity, const Vec2& mousePos)
 {
 	BulletConfig& bC = m_bulletConfig;
-	auto entity = m_entityManager.addEntity("bullet");
+	auto e = m_entityManager.addEntity("bullet");
 
 	// Adding Transform
-	float X = m_player->cTransform->pos.x;
-	float Y = m_player->cTransform->pos.y;
+	float X = entity->cTransform->pos.x;
+	float Y = entity->cTransform->pos.y;
 	// Finding velocity Vec2
 	// Find direction vector from current position of player to mousePos
 	// Normalize the vector and multiply with speed of bullet
-	Vec2 vel = mousePos - m_player->cTransform->pos;
+	Vec2 vel = mousePos - entity->cTransform->pos;
 	vel.normalize();
 	vel *= bC.S;
 
-	entity->cTransform =
-		std::make_shared<CTransform>(Vec2(X, Y), vel, 0.0f);
+	e->cTransform = std::make_shared<CTransform>(Vec2(X, Y), vel, 0.0f);
 
 	// Adding shape
 	sf::Color fillColor(bC.FR, bC.FG, bC.FB);
 	sf::Color outlineColor(bC.OR, bC.OG, bC.OB);
-	entity->cShape = std::make_shared<CShape>(bC.SR, bC.V, fillColor,
-						  outlineColor, bC.OT);
+	e->cShape = std::make_shared<CShape>(bC.SR, bC.V, fillColor,
+					     outlineColor, bC.OT);
 
 	// Enabling collisions
-	entity->cCollision = std::make_shared<CCollision>(bC.CR);
+	e->cCollision = std::make_shared<CCollision>(bC.CR);
 
 	// Bullets have lifespan
-	entity->cLifespan = std::make_shared<CLifespan>(bC.L);
+	e->cLifespan = std::make_shared<CLifespan>(bC.L);
+}
+
+void Game::spawnSpecialWeapon(std::shared_ptr<Entity> entity)
+{
+	// Spawn red bullets which have twice the lifespan of normal bullets
+	int vertices = entity->cShape->circle.getPointCount();
+	int step = 360 / vertices;
+
+	auto& bC = m_bulletConfig;
+
+	for (int i = 0; i < vertices; i++) {
+		auto e = m_entityManager.addEntity("bullet");
+		// Adding Transform
+		const Vec2& pos = entity->cTransform->pos;
+		// Each small enemy travel outwards at fixed intervals equal to
+		// 360/vertices
+		float xVel = cos(i * step * PI / 180);
+		float yVel = sin(i * step * PI / 180);
+		Vec2 vel(xVel, yVel);
+		auto speed = bC.S;
+		vel *= speed;
+
+		e->cTransform = std::make_shared<CTransform>(pos, vel, 0.0f);
+
+		// Adding shape
+		sf::Color fillColor(sf::Color::Red);
+		sf::Color outlineColor(bC.OR, bC.OG, bC.OB);
+		e->cShape = std::make_shared<CShape>(bC.SR, bC.V, fillColor,
+						     outlineColor, bC.OT);
+
+		// Enabling collisions
+		e->cCollision = std::make_shared<CCollision>(bC.CR);
+
+		// Special bullets have twice the lifespan of normal bullets
+		e->cLifespan = std::make_shared<CLifespan>(2 * bC.L);
+	}
 }
 
 void Game::run()

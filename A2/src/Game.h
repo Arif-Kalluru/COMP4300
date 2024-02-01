@@ -7,7 +7,7 @@
 #define UNIT_SCORE 10
 
 struct PlayerConfig {
-	int SR, CR, FR, FG, FB, OR, OG, OB, OT, V;
+	int SR, CR, FR, FG, FB, OR, OG, OB, OT, V, T;
 	float S;
 };
 
@@ -32,6 +32,7 @@ class Game {
 	uint32_t m_score = 0;
 	uint64_t m_currentFrame = 0;
 	uint64_t m_lastEnemySpawnFrame = 0;
+	uint64_t m_lastUsedSpecialWeaponFrame = 0;
 	bool m_paused = false;
 	bool m_running = true;
 
@@ -50,7 +51,7 @@ class Game {
 	void spawnPlayer();
 	void spawnEnemy();
 	void spawnSmallEnemies(std::shared_ptr<Entity> entity);
-	void spawnBullet(const Vec2& mousePos);
+	void spawnBullet(std::shared_ptr<Entity> entity, const Vec2& mousePos);
 	void spawnSpecialWeapon(std::shared_ptr<Entity> entity);
 
 public:

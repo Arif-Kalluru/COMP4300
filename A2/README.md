@@ -10,7 +10,7 @@
   S: int; size
   R G B: int, int, int; RGB Color
 
-- Player SR CR S FR FG FB OR OG OB OT V
+- Player SR CR S FR FG FB OR OG OB OT V T
   SR: int; shape radius
   CR: int; collision radius
   S: int; speed
@@ -18,6 +18,7 @@
   OR, OG, OB: int, int, int; outline color
   OT: int; outline thickness
   V: shape vertices
+  T: Time before special weapon can be used (in frames)
 
 - Enemy SR CR SMIN SMAX OR OG OB OT VMIN VMAX L SI
   SMIN, SMAX: float, float; min/max speed
