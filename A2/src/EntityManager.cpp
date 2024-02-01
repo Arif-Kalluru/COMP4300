@@ -30,7 +30,6 @@ void EntityManager::update()
 
 void EntityManager::removeDeadEntities(entityVec& vec)
 {
-	// TODO: look into it's effeciency
 	vec.erase(std::remove_if(vec.begin(), vec.end(),
 				 [](auto it) { return !it->isActive(); }),
 		  vec.end());

@@ -327,7 +327,8 @@ void Game::sCollision()
 			m_player->destroy();
 			e->destroy();
 			spawnPlayer();
-			m_score -= e->cScore->score;
+			auto& points = e->cScore->score;
+			m_score = m_score < points ? 0 : m_score - points;
 			return;
 		}
 	}
@@ -343,7 +344,8 @@ void Game::sCollision()
 			m_player->destroy();
 			e->destroy();
 			spawnPlayer();
-			m_score -= e->cScore->score;
+			auto& points = e->cScore->score;
+			m_score = m_score < points ? 0 : m_score - points;
 			return;
 		}
 	}
@@ -393,7 +395,6 @@ void Game::spawnEnemy()
 
 	// Adding Transform
 	// Spawn at random location with shape totally in bounds of screen
-	// TODO: try to never spawn enemy within the player's colliding radius
 	float X = randomInRange(eC.SR, m_window.getSize().x - eC.SR);
 	float Y = randomInRange(eC.SR, m_window.getSize().y - eC.SR);
 	// Random velocity
