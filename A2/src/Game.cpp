@@ -163,6 +163,25 @@ void Game::sRender()
 		e->cTransform->angle += 1.0f;
 		e->cShape->circle.setRotation(e->cTransform->angle);
 
+		// set opacity proportional to it's remaining lifespan
+		if (e->cLifespan) {
+			int opacity = 255 * (e->cLifespan->remaining) /
+				      (e->cLifespan->total);
+			// Fill color
+			const sf::Color& currFill =
+				e->cShape->circle.getFillColor();
+			sf::Color fillColor(currFill.r, currFill.g, currFill.b,
+					    opacity);
+			e->cShape->circle.setFillColor(fillColor);
+
+			// Outline color
+			const sf::Color& currOutline =
+				e->cShape->circle.getOutlineColor();
+			sf::Color outlineColor(currOutline.r, currOutline.g,
+					       currOutline.b, opacity);
+			e->cShape->circle.setOutlineColor(outlineColor);
+		}
+
 		// draw entity's circle
 		m_window.draw(e->cShape->circle);
 	}
@@ -242,6 +261,7 @@ void Game::sCollision()
 	}
 
 	// Bullet collision with small enemy
+	// Doesn't spawn smaller enemies when it dies
 	for (auto b : m_entityManager.getEntities("bullet")) {
 		for (auto e : m_entityManager.getEntities("small enemy")) {
 			const auto& enemyPos = e->cTransform->pos;
@@ -259,7 +279,7 @@ void Game::sCollision()
 	}
 
 	// Player collision with enemies
-	// If player dies, it spawns at the middle of the screen
+	// If player dies, new spawns at the middle of the screen
 	for (const auto e : m_entityManager.getEntities("enemy")) {
 		const Vec2& enemyPos = e->cTransform->pos;
 		const float& eCR = e->cCollision->collisionRadius;
@@ -275,7 +295,7 @@ void Game::sCollision()
 	}
 
 	// Player collision with small enemies
-	// If player dies, it spawns at the middle of the screen
+	// If player dies, new spawns at the middle of the screen
 	for (const auto e : m_entityManager.getEntities("small enemy")) {
 		const Vec2& enemyPos = e->cTransform->pos;
 		const float& eCR = e->cCollision->collisionRadius;
@@ -287,6 +307,16 @@ void Game::sCollision()
 			spawnPlayer();
 			m_score -= e->cScore->score;
 			return;
+		}
+	}
+}
+
+void Game::sLifespan()
+{
+	for (const auto e : m_entityManager.getEntities()) {
+		if (e->cLifespan && e->cLifespan->remaining-- <= 0) {
+			e->cLifespan->remaining = 0;
+			e->destroy();
 		}
 	}
 }
