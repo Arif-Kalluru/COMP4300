@@ -1,8 +1,10 @@
 #include "Game.h"
+#include "utils.h"
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
-#include "utils.h"
+#define PI 3.14159265
 
 Game::Game(const std::string& configFilePath)
 {
@@ -234,6 +236,24 @@ void Game::sCollision()
 				e->destroy();
 				b->destroy();
 				spawnSmallEnemies(e);
+				m_score += e->cScore->score;
+			}
+		}
+	}
+
+	// Bullet collision with small enemy
+	for (auto b : m_entityManager.getEntities("bullet")) {
+		for (auto e : m_entityManager.getEntities("small enemy")) {
+			const auto& enemyPos = e->cTransform->pos;
+			const auto& eCR = e->cCollision->collisionRadius;
+			const auto& bulletPos = b->cTransform->pos;
+			const auto& bCR = b->cCollision->collisionRadius;
+
+			// destroy bullet and enemy
+			if (bulletPos.dist(enemyPos) < bCR + eCR) {
+				e->destroy();
+				b->destroy();
+				m_score += e->cScore->score;
 			}
 		}
 	}
@@ -249,6 +269,23 @@ void Game::sCollision()
 			m_player->destroy();
 			e->destroy();
 			spawnPlayer();
+			m_score -= e->cScore->score;
+			return;
+		}
+	}
+
+	// Player collision with small enemies
+	// If player dies, it spawns at the middle of the screen
+	for (const auto e : m_entityManager.getEntities("small enemy")) {
+		const Vec2& enemyPos = e->cTransform->pos;
+		const float& eCR = e->cCollision->collisionRadius;
+
+		// Current player died, spawn a new one
+		if (playerPos.dist(enemyPos) < pCR + eCR) {
+			m_player->destroy();
+			e->destroy();
+			spawnPlayer();
+			m_score -= e->cScore->score;
 			return;
 		}
 	}
@@ -328,6 +365,45 @@ void Game::spawnEnemy()
 
 void Game::spawnSmallEnemies(std::shared_ptr<Entity> entity)
 {
+	int vertices = entity->cShape->circle.getPointCount();
+	int step = 360 / vertices;
+
+	EnemyConfig& eC = m_enemyConfig;
+
+	for (int i = 0; i < vertices; i++) {
+		auto smallEntity = m_entityManager.addEntity("small enemy");
+		// Adding Transform
+		Vec2& pos = entity->cTransform->pos;
+		// Each small enemy travel outwards at fixed intervals equal to
+		// 360/vertices
+		float xVel = cos(i * step * PI / 180);
+		float yVel = sin(i * step * PI / 180);
+		Vec2 vel(xVel, yVel);
+		auto speed = entity->cTransform->velocity.length();
+		vel *= speed;
+		smallEntity->cTransform =
+			std::make_shared<CTransform>(pos, vel, 0.0f);
+
+		// Adding shape
+		// Small enemies have same color of their parent but half the radius
+		auto fillColor = entity->cShape->circle.getFillColor();
+		auto outlineColor = entity->cShape->circle.getOutlineColor();
+
+		smallEntity->cShape = std::make_shared<CShape>(
+			eC.SR / 2.0f, vertices, fillColor, outlineColor,
+			eC.OT / 2.0f);
+
+		// Enabling collisions, small enemies have half the radius
+		smallEntity->cCollision =
+			std::make_shared<CCollision>(eC.CR / 2);
+
+		// small enemy score is half the original enemy
+		smallEntity->cScore =
+			std::make_shared<CScore>(vertices * UNIT_SCORE / 2);
+
+		// small enemies have a lifespan
+		smallEntity->cLifespan = std::make_shared<CLifespan>(eC.L);
+	}
 }
 
 void Game::spawnBullet(const Vec2& mousePos)
@@ -356,6 +432,9 @@ void Game::spawnBullet(const Vec2& mousePos)
 
 	// Enabling collisions
 	entity->cCollision = std::make_shared<CCollision>(bC.CR);
+
+	// Bullets have lifespan
+	entity->cLifespan = std::make_shared<CLifespan>(bC.L);
 }
 
 void Game::run()
@@ -373,6 +452,7 @@ void Game::run()
 			this->sEnemySpawner();
 			this->sMovement();
 			this->sCollision();
+			this->sLifespan();
 		}
 
 		this->sUserInput();

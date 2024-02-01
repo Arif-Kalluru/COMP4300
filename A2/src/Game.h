@@ -4,7 +4,7 @@
 #include "EntityManager.h"
 #include <SFML/Graphics.hpp>
 
-#define UNIT_SCORE 100
+#define UNIT_SCORE 10
 
 struct PlayerConfig {
 	int SR, CR, FR, FG, FB, OR, OG, OB, OT, V;
