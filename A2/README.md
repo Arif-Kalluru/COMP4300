@@ -28,6 +28,8 @@
 
 - Bullet SR CR S FR FG FB OR OG OB OT V L
 
-
-### Game Specifications
-- Enemy fill color is random
+### Instructions to run
+```
+g++ src/*.cpp -Isrc -std=c++17 -o bin/sfmlgame -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+./bin/sfmlgame
+```
