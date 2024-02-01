@@ -3,6 +3,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #define PI 3.14159265
 
@@ -38,8 +39,7 @@ void Game::init(const std::string& filePath)
 		std::cerr << "Could not load font!\n";
 		exit(-1);
 	}
-	m_text.setCharacterSize(fontSize);
-	m_text.setFillColor(sf::Color(fontR, fontG, fontB));
+	m_text = sf::Text("Score: 0", m_font, fontSize);
 
 	// player config
 	PlayerConfig& p = m_playerConfig;  // alias
@@ -104,6 +104,10 @@ void Game::sUserInput()
 				break;
 			case sf::Keyboard::D:
 				m_player->cInput->right = true;
+				break;
+			// Exit game
+			case sf::Keyboard::Q:
+				m_running = false;
 				break;
 			// Pause game
 			case sf::Keyboard::Escape:
@@ -184,6 +188,29 @@ void Game::sRender()
 
 		// draw entity's circle
 		m_window.draw(e->cShape->circle);
+	}
+
+	// Render score
+	std::string scoreStr = "Score: " + std::to_string(m_score);
+	m_text.setString(scoreStr);
+	m_window.draw(m_text);
+
+	// When paused, show instructions and game controls in middle of the screen
+	if (m_paused) {
+		std::string controlsStr =
+			"Press W to move Up\nPress S to move Down\nPress A to move Left\nPress D to move Right\nPress ESC to Play/Pause\nPress Q to Exit\nClick LEFT MOUSE BUTTON to shoot bullet\nClick RIGHT MOUSE BUTTON to use special weapon";
+		auto controlsText = sf::Text(controlsStr, m_font,
+					     m_text.getCharacterSize());
+
+		// Centering the text
+		sf::FloatRect textRect = controlsText.getLocalBounds();
+		controlsText.setOrigin(textRect.left + textRect.width / 2.0f,
+				       textRect.top + textRect.height / 2.0f);
+		const auto& winWidth = m_window.getSize().x;
+		const auto& winHeight = m_window.getSize().y;
+		controlsText.setPosition(winWidth / 2.0f, winHeight / 2.0f);
+
+		m_window.draw(controlsText);
 	}
 
 	m_window.display();
