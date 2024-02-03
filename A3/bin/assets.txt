@@ -1,7 +1,2 @@
-Texture TexStand images/megaman/stand64.png
-Animation Stand TextRun 1 0
-Animation Run TextRun 4 10
-
-Texture TexStand assets/images/characters-sprite.gif
-Animation
-Font Joystix assets/fonts/joystix_monospace.otf
+Texture TexMarioIdleRight assets/images/characters-sprite.gif 222 44 16 16 0
+Animation MarioIdleRight TexMarioIdleRight 1 0

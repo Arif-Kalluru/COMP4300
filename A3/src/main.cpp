@@ -1,7 +1,8 @@
-#include <iostream>
+#include "GameEngine.hpp"
 
 int main()
 {
-	std::cout << "Hello World!" << std::endl;
+	GameEngine g("bin/config.txt");
+	g.run();
 	return 0;
 }

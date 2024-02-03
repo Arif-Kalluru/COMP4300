@@ -1,3 +1,11 @@
+# config.txt
+### Window Specification
+`Window W H F M`
+- Window Width W int
+- Window Height H int
+- Frame rate F int
+- Toggle Full Screen Mode M bool (0/1)
+
 # assets.txt
 ### Texture Asset Specification:
 `Texture N P`
@@ -5,11 +13,12 @@
 - Texture FilePath P string
 
 ### Animation Asset Specification:
-`Animation N T F D`
+`Animation N T F D S`
 - Animation Name N string
 - Texture Name T string
 - Frame Count F int
 - Animation Duration D int
+- Enable Smooth S bool (0/1)
 
 ### Font Asset Specification:
 `Font N P`
