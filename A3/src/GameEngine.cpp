@@ -1,3 +1,4 @@
+#include "Action.hpp"
 #include "GameEngine.hpp"
 #include "Scene_Menu.hpp"
 
@@ -61,6 +62,28 @@ void GameEngine::sUserInput()
 		if (event.type == sf::Event::Closed)
 		{
 			this->quit();
+		}
+		else if (event.type == sf::Event::KeyPressed ||
+		         event.type == sf::Event::KeyReleased)
+		{
+			// If current scene doesn't have an action associated with this key, skip it
+			if (currentScene()->getActionMap().find(event.key.code) ==
+			    currentScene()->getActionMap().end())
+			{
+				continue;
+			}
+
+			// Determine start or end action by whether key was pressed or released
+			const std::string& actionType =
+				(event.type == sf::Event::KeyPressed) ? "START" : "END";
+
+			// Look up the action and send it to current scene
+			currentScene()->sDoAction(
+				Action(
+					currentScene()->getActionMap().at(event.key.code),
+					actionType
+				)
+			);
 		}
 	}
 }

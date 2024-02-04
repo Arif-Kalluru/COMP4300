@@ -16,7 +16,7 @@ bool Assets::addTexture(const std::string& textureName, const std::string& path,
 	if (!texture.loadFromFile(path))
 	{
 		std::cerr << "Failed to load texture: " << textureName << " " <<
-		          path << std::endl;
+		    path << std::endl;
 		return false;
 	}
 
@@ -33,7 +33,7 @@ bool Assets::addTexture(const std::string& textureName, const std::string& path,
 	if (!texture.loadFromFile(path, sf::IntRect(posX, posY, width, height)))
 	{
 		std::cerr << "Failed to load texture: " << textureName << " " <<
-		          path << std::endl;
+			path << std::endl;
 		return false;
 	}
 
@@ -43,9 +43,20 @@ bool Assets::addTexture(const std::string& textureName, const std::string& path,
 	return true;
 }
 
-bool addFont(const std::string& fontName, const std::string& path)
+bool Assets::addFont(const std::string& fontName, const std::string& path)
 {
-	// TODO
+	sf::Font font;
+
+	if (!font.loadFromFile(path))
+	{
+		std::cerr << "Failed to load font: " << fontName << " " << path <<
+			std::endl;
+		return false;
+	}
+
+	m_fontMap[fontName] = font;
+
+	return true;
 }
 
 bool Assets::addAnimation(const std::string& animationName,
@@ -72,7 +83,8 @@ const Animation& Assets::getAnimation(const std::string& animationName) const
 
 const sf::Font& Assets::getFont(const std::string& fontName) const
 {
-	// TODO
+	// TODO: handle not found case
+	return m_fontMap.at(fontName);
 }
 
 void Assets::loadFromFile(const std::string& filePath)
@@ -100,6 +112,15 @@ void Assets::loadFromFile(const std::string& filePath)
 			int frameCount, duration;
 			fin >> name >> textureName >> frameCount >> duration;
 			if (!this->addAnimation(name, textureName, frameCount, duration))
+			{
+				// TODO: handle error
+			}
+		}
+		else if (token == "Font")
+		{
+			std::string name, path;
+			fin >> name >> path;
+			if (!this->addFont(name, path))
 			{
 				// TODO: handle error
 			}
