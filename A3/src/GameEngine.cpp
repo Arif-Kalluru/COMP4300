@@ -7,7 +7,7 @@
 
 GameEngine::GameEngine(const std::string& filePath)
 {
-	this->init(filePath);
+	init(filePath);
 }
 
 void GameEngine::init(const std::string& filePath)
@@ -43,8 +43,8 @@ void GameEngine::init(const std::string& filePath)
 
 void GameEngine::update()
 {
-	this->sUserInput();
-	this->currentScene()->update();
+	sUserInput();
+	currentScene()->update();
 }
 
 std::shared_ptr<Scene> GameEngine::currentScene()
@@ -61,7 +61,7 @@ void GameEngine::sUserInput()
 	{
 		if (event.type == sf::Event::Closed)
 		{
-			this->quit();
+			quit();
 		}
 		else if (event.type == sf::Event::KeyPressed ||
 		         event.type == sf::Event::KeyReleased)
@@ -105,9 +105,9 @@ sf::RenderWindow& GameEngine::window()
 
 void GameEngine::run()
 {
-	while (this->isRunning())
+	while (isRunning())
 	{
-		this->update();
+		update();
 	}
 
 	m_window.close();

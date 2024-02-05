@@ -59,6 +59,7 @@ class CAnimation : public Component
 {
 public:
 	Animation animation;
+	bool repeat = false;
 
 	CAnimation()
 	{
@@ -66,6 +67,21 @@ public:
 
 	CAnimation(const Animation& _animation)
 		: animation(_animation)
+	{
+	}
+};
+
+class CGravity : public Component
+{
+public:
+	float gravity = 0;
+
+	CGravity()
+	{
+	}
+
+	CGravity(float g)
+		: gravity(g)
 	{
 	}
 };

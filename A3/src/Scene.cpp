@@ -19,3 +19,8 @@ const ActionMap& Scene::getActionMap() const
 {
 	return m_actionMap;
 }
+
+void Scene::setPaused(bool paused)
+{
+	m_paused = !m_paused;
+}

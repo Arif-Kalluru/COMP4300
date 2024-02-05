@@ -8,9 +8,21 @@
 class ScenePlay : public Scene
 {
 private:
-	std::string             m_levelPath;
-	EntityManager           m_entityManager;
+	struct PlayerConfig
+	{
+		float X, Y, CX, CY, SPEED, MAXSPEED, JUMP, GRAVITY;
+		std::string WEAPON;
+	};
+
 	std::shared_ptr<Entity> m_player;
+	PlayerConfig            m_playerConfig;
+	EntityManager           m_entityManager;
+	std::string             m_levelPath;
+	bool                    m_drawTextures  = true;
+	bool                    m_drawCollision = false;
+	bool                    m_drawGrid      = false;
+	const Vec2              m_gridSize      = { 64, 64 };
+	sf::Text                m_gridText;
 
 	void update()                        override;
 	void onEnd()                         override;
@@ -20,6 +32,7 @@ private:
 	void init(const std::string& levelPath);
 	void loadLevel(const std::string& levelPath);
 	void sMovement();
+	void drawLine(const Vec2& p1, const Vec2& p2);
 	void spawnPlayer();
 
 public:

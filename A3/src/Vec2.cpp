@@ -19,7 +19,7 @@ bool Vec2::operator==(const Vec2& rhs) const
 
 bool Vec2::operator!=(const Vec2& rhs) const
 {
-	return !(this->operator==(rhs));
+	return !(operator==(rhs));
 }
 
 Vec2 Vec2::operator+(const Vec2& rhs) const
@@ -78,6 +78,6 @@ float Vec2::length() const
 
 void Vec2::normalize()
 {
-	float len = this->length();
+	float len = length();
 	(*this) /= len;
 }

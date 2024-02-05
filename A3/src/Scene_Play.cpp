@@ -9,17 +9,23 @@ ScenePlay::ScenePlay(GameEngine* gameEngine, const std::string& levelPath)
 	: Scene(gameEngine)
 	, m_levelPath(levelPath)
 {
-	this->init(levelPath);
+	init(levelPath);
 }
 
 void ScenePlay::init(const std::string& levelPath)
 {
-	this->registerAction(sf::Keyboard::W, "JUMP");
-	this->registerAction(sf::Keyboard::Up, "JUMP");
-	this->registerAction(sf::Keyboard::Escape, "EXIT");
-	this->registerAction(sf::Keyboard::P, "PAUSE");
+	registerAction(sf::Keyboard::W, "JUMP");
+	registerAction(sf::Keyboard::Up, "JUMP");
+	registerAction(sf::Keyboard::Escape, "EXIT");
+	registerAction(sf::Keyboard::P, "PAUSE");
+	registerAction(sf::Keyboard::T, "TOGGLE_TEXTURE");   // Toggle drawing textures
+	registerAction(sf::Keyboard::C, "TOGGLE_COLLISION"); // Toggle drawing collision boxes
+	registerAction(sf::Keyboard::G, "TOGGLE_GRID");      // Toggle drawing Grid
 
-	this->loadLevel(levelPath);
+	m_gridText.setCharacterSize(12);
+	m_gridText.setFont(m_game->assets().getFont("Arial"));
+
+	loadLevel(levelPath);
 }
 
 void ScenePlay::loadLevel(const std::string& levelPath)
@@ -30,7 +36,7 @@ void ScenePlay::loadLevel(const std::string& levelPath)
 	// Read level from level file
 	// Read player config from player config file
 
-	this->spawnPlayer();
+	spawnPlayer();
 }
 
 void ScenePlay::spawnPlayer()
@@ -50,8 +56,8 @@ void ScenePlay::spawnPlayer()
 void ScenePlay::update()
 {
 	m_entityManager.update();
-	this->sMovement();
-	this->sRender();
+	sMovement();
+	sRender();
 }
 
 void ScenePlay::onEnd()
@@ -69,7 +75,11 @@ void ScenePlay::sDoAction(const Action& action)
 		}
 		else if (action.name() == "EXIT")
 		{
-			this->onEnd();
+			onEnd();
+		}
+		else if (action.name() == "PAUSE")
+		{
+			setPaused(m_paused);
 		}
 	}
 	else if (action.type() == "END")
@@ -105,11 +115,27 @@ void ScenePlay::sMovement()
 	}
 }
 
+void ScenePlay::drawLine(const Vec2& p1, const Vec2& p2)
+{
+	sf::Vertex line[] = { sf::Vector2f(p1.x, p1.y), sf::Vector2f(p2.x, p2.y) };
+	m_game->window().draw(line, 2, sf::Lines);
+}
+
 void ScenePlay::sRender()
 {
 	// TODO: remove this testing code
 	auto& window = m_game->window();
-	window.clear();
+	if (!m_paused)
+	{
+		// color the background darker when paused
+		window.clear(sf::Color(100, 100, 255));
+	}
+	else
+	{
+		window.clear(sf::Color(50, 50, 150));
+	}
+
+	// Set the viewport of the window to be centered on the player if it's far enough right
 
 	for (auto e : m_entityManager.getEntities())
 	{

@@ -5,18 +5,18 @@
 SceneMenu::SceneMenu(GameEngine* gameEngine)
 	: Scene(gameEngine)
 {
-	this->init();
+	init();
 }
 
 void SceneMenu::init()
 {
-	this->registerAction(sf::Keyboard::W, "UP");
-	this->registerAction(sf::Keyboard::Up, "UP");
-	this->registerAction(sf::Keyboard::S, "DOWN");
-	this->registerAction(sf::Keyboard::Down, "DOWN");
-	this->registerAction(sf::Keyboard::Enter, "SELECT");
-	this->registerAction(sf::Keyboard::Q, "QUIT");
-	this->registerAction(sf::Keyboard::Escape, "QUIT");
+	registerAction(sf::Keyboard::W, "UP");
+	registerAction(sf::Keyboard::Up, "UP");
+	registerAction(sf::Keyboard::S, "DOWN");
+	registerAction(sf::Keyboard::Down, "DOWN");
+	registerAction(sf::Keyboard::Enter, "SELECT");
+	registerAction(sf::Keyboard::Q, "QUIT");
+	registerAction(sf::Keyboard::Escape, "QUIT");
 
 	m_title = "Super Mario Clone";
 	m_menuStrings.push_back("Level 1");
@@ -33,7 +33,7 @@ void SceneMenu::init()
 
 void SceneMenu::update()
 {
-	this->sRender();
+	sRender();
 }
 
 void SceneMenu::onEnd()
@@ -68,7 +68,7 @@ void SceneMenu::sDoAction(const Action& action)
 		}
 		else if (action.name() == "QUIT")
 		{
-			this->onEnd();
+			onEnd();
 		}
 	}
 }

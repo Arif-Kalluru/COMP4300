@@ -63,7 +63,7 @@ bool Assets::addAnimation(const std::string& animationName,
 					const std::string& textureName, const size_t frameCount,
 					const size_t duration)
 {
-	auto& texture = this->getTexture(textureName);
+	auto& texture = getTexture(textureName);
 	m_animationMap[animationName] = Animation(animationName, texture); // TODO: frameCount & duration
 
 	return true;
@@ -101,7 +101,7 @@ void Assets::loadFromFile(const std::string& filePath)
 			int X, Y, width, height;
 			bool smooth;
 			fin >> name >> path >> X >> Y >> width >> height >> smooth;
-			if (!this->addTexture(name, path, X, Y, width, height, smooth))
+			if (!addTexture(name, path, X, Y, width, height, smooth))
 			{
 				// TODO: handle error
 			}
@@ -111,7 +111,7 @@ void Assets::loadFromFile(const std::string& filePath)
 			std::string name, textureName;
 			int frameCount, duration;
 			fin >> name >> textureName >> frameCount >> duration;
-			if (!this->addAnimation(name, textureName, frameCount, duration))
+			if (!addAnimation(name, textureName, frameCount, duration))
 			{
 				// TODO: handle error
 			}
@@ -120,7 +120,7 @@ void Assets::loadFromFile(const std::string& filePath)
 		{
 			std::string name, path;
 			fin >> name >> path;
-			if (!this->addFont(name, path))
+			if (!addFont(name, path))
 			{
 				// TODO: handle error
 			}

@@ -32,4 +32,5 @@ public:
 	const ActionMap& getActionMap() const;
 
 	void registerAction(int inputKey, const std::string& actionName);
+	void setPaused(bool paused);
 };
