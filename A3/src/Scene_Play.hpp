@@ -33,6 +33,8 @@ private:
 	void loadLevel(const std::string& levelPath);
 	void sMovement();
 	void sAnimation();
+	void setAnimation(std::shared_ptr<Entity> entity,
+					  const std::string& animationName, bool repeat); // helper function
 	void drawLine(const Vec2& p1, const Vec2& p2);
 	void spawnPlayer();
 
