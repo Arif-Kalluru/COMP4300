@@ -16,6 +16,8 @@ void ScenePlay::init(const std::string& levelPath)
 {
 	registerAction(sf::Keyboard::W, "JUMP");
 	registerAction(sf::Keyboard::Up, "JUMP");
+	registerAction(sf::Keyboard::D, "RIGHT");
+	registerAction(sf::Keyboard::Right, "RIGHT");
 	registerAction(sf::Keyboard::Escape, "EXIT");
 	registerAction(sf::Keyboard::P, "PAUSE");
 	registerAction(sf::Keyboard::T, "TOGGLE_TEXTURE");   // Toggle drawing textures
@@ -33,8 +35,8 @@ void ScenePlay::loadLevel(const std::string& levelPath)
 	// Reset entity manager on every new level
 	m_entityManager = EntityManager();
 
-	// Read level from level file
-	// Read player config from player config file
+	// TODO: Read level from level file
+	// TODO: Read player config from player config file
 
 	spawnPlayer();
 }
@@ -47,7 +49,8 @@ void ScenePlay::spawnPlayer()
 	entity->addComponent<CTransform>(Vec2(100, 200), Vec2(0.0f, 0.0f),
 	                                 Vec2(3.0f, 3.0f), 0);
 	auto& c = entity->addComponent<CAnimation>(
-		m_game->assets().getAnimation("MarioIdleRight")
+		m_game->assets().getAnimation("MarioIdleRight"),
+		true
 	);
 
 	m_player = entity;
@@ -57,6 +60,9 @@ void ScenePlay::update()
 {
 	m_entityManager.update();
 	sMovement();
+	// sCollision();
+	// sLifespan();
+	sAnimation();
 	sRender();
 }
 
@@ -73,6 +79,10 @@ void ScenePlay::sDoAction(const Action& action)
 		{
 			m_player->getComponent<CInput>().up = true;
 		}
+		else if (action.name() == "RIGHT")
+		{
+			m_player->getComponent<CInput>().right = true;
+		}
 		else if (action.name() == "EXIT")
 		{
 			onEnd();
@@ -88,6 +98,11 @@ void ScenePlay::sDoAction(const Action& action)
 		{
 			m_player->getComponent<CInput>().up = false;
 		}
+		else if (action.name() == "RIGHT")
+		{
+			m_player->getComponent<CInput>().right = false;
+			m_player->getComponent<CState>().state = "idleRight";
+		}
 	}
 }
 
@@ -97,8 +112,14 @@ void ScenePlay::sMovement()
 
 	if (m_player->getComponent<CInput>().up)
 	{
-		playerVelocity.y -= 3;
+		playerVelocity.y -= 5;
 	}
+	else if (m_player->getComponent<CInput>().right)
+	{
+		playerVelocity.x += 5;
+		m_player->getComponent<CState>().state = "runRight";
+	}
+
 
 	m_player->getComponent<CTransform>().velocity = playerVelocity;
 
@@ -113,6 +134,31 @@ void ScenePlay::sMovement()
 		e->getComponent<CTransform>().pos +=
 			e->getComponent<CTransform>().velocity;
 	}
+}
+
+void ScenePlay::sAnimation()
+{
+	// TODO: Testing if animations are being updated
+	if (m_player->getComponent<CState>().state == "runRight")
+	{
+		if (m_player->getComponent<CAnimation>().animation.getName()
+			!= "MarioRunRight")
+		{
+			m_player->getComponent<CAnimation>() =
+				CAnimation(m_game->assets().getAnimation("MarioRunRight"), true);
+		}
+	}
+	else if (m_player->getComponent<CState>().state == "idleRight")
+	{
+		if (m_player->getComponent<CAnimation>().animation.getName()
+			!= "MarioIdleRight")
+		{
+			m_player->getComponent<CAnimation>() =
+				CAnimation(m_game->assets().getAnimation("MarioIdleRight"), true);
+		}
+	}
+
+	m_player->getComponent<CAnimation>().animation.update();
 }
 
 void ScenePlay::drawLine(const Vec2& p1, const Vec2& p2)

@@ -8,9 +8,12 @@
 
 # assets.txt
 ### Texture Asset Specification:
-`Texture N P`
+`Texture N P X Y S`
 - Texture Name N string
 - Texture FilePath P string
+- Texture X (left) Position X int
+- Texture Y (top) Position Y int
+- Enable Smooth S bool (0/1)
 
 ### Animation Asset Specification:
 `Animation N T F D S`
@@ -18,7 +21,6 @@
 - Texture Name T string
 - Frame Count F int
 - Animation Duration D int
-- Enable Smooth S bool (0/1)
 
 ### Font Asset Specification:
 `Font N P`

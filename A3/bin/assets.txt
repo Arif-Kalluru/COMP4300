@@ -1,4 +1,6 @@
-Texture TexMarioIdleRight assets/images/characters-sprite.gif 222 44 16 16 0
-Animation MarioIdleRight TexMarioIdleRight 1 0
+Texture TexMarioIdleRight assets/images/characters-sprite.gif 275 44 16 16 0
+Texture TexMarioRunRight assets/images/characters-sprite.gif 290 44 48 16 0
+Animation MarioIdleRight TexMarioIdleRight 1 1
+Animation MarioRunRight TexMarioRunRight 3 10
 Font Joystix assets/fonts/joystix_monospace.otf
 Font Arial assets/fonts/Arial.ttf

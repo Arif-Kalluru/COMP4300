@@ -65,8 +65,9 @@ public:
 	{
 	}
 
-	CAnimation(const Animation& _animation)
+	CAnimation(const Animation& _animation, bool _repeat)
 		: animation(_animation)
+		, repeat(_repeat)
 	{
 	}
 };
@@ -82,6 +83,20 @@ public:
 
 	CGravity(float g)
 		: gravity(g)
+	{
+	}
+};
+
+class CState : public Component
+{
+public:
+	std::string state = "jumping";
+	CState()
+	{
+	}
+
+	CState(const std::string& _state)
+		: state(_state)
 	{
 	}
 };
