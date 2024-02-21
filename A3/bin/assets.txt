@@ -1,14 +1,8 @@
-Texture TexMarioIdleLeft assets/images/characters-sprite.png 0 32 16 16 0
-Texture TexMarioIdleRight assets/images/characters-sprite.png 0 0 16 16 0
-Texture TexMarioRunLeft assets/images/characters-sprite.png 16 32 48 16 0
-Texture TexMarioRunRight assets/images/characters-sprite.png 16 0 48 16 0
-Texture TexMarioJumpLeft assets/images/characters-sprite.png 64 32 16 16 0
-Texture TexMarioJumpRight assets/images/characters-sprite.png 64 0 16 16 0
-Animation MarioIdleLeft TexMarioIdleLeft 1 1
-Animation MarioIdleRight TexMarioIdleRight 1 1
-Animation MarioRunLeft TexMarioRunLeft 3 10
-Animation MarioRunRight TexMarioRunRight 3 10
-Animation MarioJumpLeft TexMarioJumpLeft 1 1
-Animation MarioJumpRight TexMarioJumpRight 1 1
+Texture TexMarioIdle assets/images/characters-sprite.png 0 0 16 16 0
+Texture TexMarioRun assets/images/characters-sprite.png 16 0 48 16 0
+Texture TexMarioJump assets/images/characters-sprite.png 64 0 16 16 0
+Animation MarioIdle TexMarioIdle 1 1
+Animation MarioRun  TexMarioRun 3 10
+Animation MarioJump TexMarioJump 1 1
 Font Joystix assets/fonts/joystix_monospace.otf
 Font Arial assets/fonts/Arial.ttf

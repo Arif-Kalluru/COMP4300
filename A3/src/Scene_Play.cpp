@@ -43,30 +43,35 @@ void ScenePlay::loadLevel(const std::string& levelPath)
 
 void ScenePlay::spawnPlayer()
 {
-    // TODO: remove this testing code
+    // TODO: Use player config
     auto entity = m_entityManager.addEntity("Mario");
 
     entity->addComponent<CTransform>(Vec2(100, 200), Vec2(0.0f, 0.0f),
                                      Vec2(4.0f, 4.0f), 0); // scale set to 4x16, 4x16
     auto& c = entity->addComponent<CAnimation>(
-        m_game->assets().getAnimation("MarioIdleRight"),
+        m_game->assets().getAnimation("MarioIdle"),
         true
     );
-    entity->addComponent<CState>().state = "idleRight";
-    // TODO: Use player config
+    entity->addComponent<CState>("idle");
     entity->addComponent<CBoundingBox>(Vec2(64, 64));
+    entity->addComponent<CGravity>(0.75);
 
     m_player = entity;
 }
 
 void ScenePlay::update()
 {
-    m_entityManager.update();
-    sMovement();
-    // sCollision();
-    // sLifespan();
-    sAnimation();
+    if (!m_paused)
+    {
+        m_entityManager.update();
+        sMovement();
+        sCollision();
+        // sLifespan();
+        sAnimation();
+    }
+
     sRender();
+
 }
 
 void ScenePlay::onEnd()
@@ -116,26 +121,14 @@ void ScenePlay::sDoAction(const Action& action)
         if (action.name() == "JUMP")
         {
             m_player->getComponent<CInput>().up = false;
-            auto& playerState = m_player->getComponent<CState>().state;
-            // TODO: Ideally jump should be shown until player is in air
-            if (playerState == "jumpLeft")
-            {
-                playerState = "idleLeft";
-            }
-            else if (playerState == "jumpRight")
-            {
-                playerState = "idleRight";
-            }
         }
         else if (action.name() == "LEFT")
         {
             m_player->getComponent<CInput>().left = false;
-            m_player->getComponent<CState>().state = "idleLeft";
         }
         else if (action.name() == "RIGHT")
         {
             m_player->getComponent<CInput>().right = false;
-            m_player->getComponent<CState>().state = "idleRight";
         }
     }
 }
@@ -144,41 +137,60 @@ void ScenePlay::sMovement()
 {
     Vec2 playerVelocity(0, 0);
 
-    if (m_player->getComponent<CInput>().up)
-    {
-        playerVelocity.y -= 5;
-        auto& currentState = m_player->getComponent<CState>().state;
+    auto& input = m_player->getComponent<CInput>();
+    auto& playerState = m_player->getComponent<CState>().state;
+    auto& playerTransform = m_player->getComponent<CTransform>();
 
-        if (currentState == "runRight" || currentState == "idleRight")
+    // Player movement
+    if (playerState != "jump")
+    {
+        if (input.up)
         {
-            currentState = "jumpRight";
+            if (playerState == "run" || playerState == "idle")
+            {
+                playerState = "jump";
+            }
+
+            // When you go into a jump from running state, preserve the x direction velocity
+            playerVelocity.x = playerTransform.velocity.x;
+
+            playerVelocity.y -= 15;
         }
-        else if (currentState == "runLeft" || currentState == "idleLeft")
+        else if (input.right)
         {
-            currentState = "jumpLeft";
+            playerVelocity.x += 5;
+            playerState = "run";
+            playerTransform.scale.x = abs(playerTransform.scale.x);
         }
-    }
-    else if (m_player->getComponent<CInput>().right)
-    {
-        playerVelocity.x += 5;
-        m_player->getComponent<CState>().state = "runRight";
-    }
-    else if (m_player->getComponent<CInput>().left)
-    {
-        playerVelocity.x -= 5;
-        m_player->getComponent<CState>().state = "runLeft";
+        else if (input.left)
+        {
+            playerVelocity.x -= 5;
+            playerState = "run";
+            playerTransform.scale.x = -abs(playerTransform.scale.x);
+        }
+        else if (!input.right && playerState == "run")
+        {
+            playerState = "idle";
+            playerTransform.scale.x = abs(playerTransform.scale.x);
+        }
+        else if (!input.left && playerState == "run")
+        {
+            playerState = "idle";
+            playerTransform.scale.x = -abs(playerTransform.scale.x);
+        }
+
+        m_player->getComponent<CTransform>().velocity = playerVelocity;
     }
 
-
-    m_player->getComponent<CTransform>().velocity = playerVelocity;
-
+    // Update velocities
     for (auto e : m_entityManager.getEntities())
     {
-        // if (e->hasComponent<CGravity>())
-        // {
-        // 	e->getComponent<CTransform>().velocity.y +=
-        // 		e->getComponent<CGravity>().gravity;
-        // }
+        // Gravity
+        if (e->hasComponent<CGravity>())
+        {
+        	e->getComponent<CTransform>().velocity.y +=
+        		e->getComponent<CGravity>().gravity;
+        }
 
         e->getComponent<CTransform>().pos +=
             e->getComponent<CTransform>().velocity;
@@ -201,32 +213,37 @@ void ScenePlay::sAnimation()
 {
     const auto& playerState = m_player->getComponent<CState>().state;
 
-    if (playerState == "runRight")
+    if (playerState == "run")
     {
-        setAnimation(m_player, "MarioRunRight", true);
+        setAnimation(m_player, "MarioRun", true);
     }
-    else if (playerState == "idleRight")
+    else if (playerState == "idle")
     {
-        setAnimation(m_player, "MarioIdleRight", true);
+        setAnimation(m_player, "MarioIdle", true);
     }
-    else if (playerState == "runLeft")
+    else if (playerState == "jump")
     {
-        setAnimation(m_player, "MarioRunLeft", true);
-    }
-    else if (playerState == "idleLeft")
-    {
-        setAnimation(m_player, "MarioIdleLeft", true);
-    }
-    else if (playerState == "jumpLeft")
-    {
-        setAnimation(m_player, "MarioJumpLeft", true);
-    }
-    else if (playerState == "jumpRight")
-    {
-        setAnimation(m_player, "MarioJumpRight", true);
+        setAnimation(m_player, "MarioJump", true);
     }
 
     m_player->getComponent<CAnimation>().animation.update();
+}
+
+void ScenePlay::sCollision()
+{
+    // TODO: Remove this testing code. Imaginary platform
+    auto& playerTransform = m_player->getComponent<CTransform>();
+    auto& playerState = m_player->getComponent<CState>().state;
+
+    if (playerTransform.pos.y > 200) // collision with platform
+    {
+        playerTransform.pos.y = 200;
+        if (playerState == "jump")
+        {
+            playerState = "idle";
+            playerTransform.velocity = { 0.0f, 0.0f };
+        }
+    }
 }
 
 void ScenePlay::drawLine(const Vec2& p1, const Vec2& p2)
